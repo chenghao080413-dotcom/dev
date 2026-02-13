@@ -1,0 +1,39 @@
+import os
+import google.generativeai as genai
+from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class ButlerAI:
+    def __init__(self):
+        # Initialize Google Gemini
+        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        self.gemini_model = genai.GenerativeModel('gemini-pro')
+
+        # Initialize OpenAI (ChatGPT)
+        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        # Initialize Grok (xAI) - Note: Grok often uses OpenAI-compatible SDK
+        self.grok_client = OpenAI(
+            api_key=os.getenv("GROK_API_KEY"),
+            base_url="https://api.x.ai/v1",
+        )
+
+    def ask_gemini(self, prompt):
+        response = self.gemini_model.generate_content(prompt)
+        return response.text
+
+    def ask_gpt(self, prompt):
+        response = self.openai_client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+
+    def ask_grok(self, prompt):
+        response = self.grok_client.chat.completions.create(
+            model="grok-beta",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
